@@ -10,10 +10,6 @@ import matplotlib.pyplot as plt
 
 TIF_PATH = "maps\DE_10m_3035_tiled.tif"
 
-@st.cache_resource
-def load_raster():
-    return rasterio.open(TIF_PATH)
-
 def crop_and_resample(src, bounds, output_size=(128, 128)):
     """Crop raster to bounds and resample to output_size (width, height)."""
     south = bounds['_southWest']['lat']
@@ -41,17 +37,12 @@ def crop_and_resample(src, bounds, output_size=(128, 128)):
     )
     return data, transform
 
-def plot_raster(data):
-    """Plot RGB or grayscale raster and return matplotlib figure."""
-    if data.shape[0] >= 3:
-        img = np.dstack([data[0], data[1], data[2]])
-    else:
-        img = data[0]
-
-    fig, ax = plt.subplots(figsize=(6,6))
-    ax.imshow(img)
-    ax.axis('off')
-    return fig
+def normalize(arr):
+    arr = arr.astype('float32')
+    arr -= arr.min()
+    arr /= arr.max()
+    arr *= 255
+    return arr.astype('uint8')
 
 # --- Streamlit app ---
 st.title("FlameCell Forest Fire Simulator: Select Area by Zoom/Pan")
@@ -67,7 +58,8 @@ with rasterio.open(tif_path) as src:
     m = folium.Map(location=[51.1657, 10.4515], zoom_start=6)
 
     # Display interactive map with folium and streamlit-folium
-    map_data = st_folium(m, width=700, height=500)
+    st.markdown("<div style='height:1px'></div>", unsafe_allow_html=True)
+    map_data = st_folium(m, width=700, height=700)
 
     bounds = map_data.get("bounds")
     # Get visible bounds from map
@@ -76,12 +68,15 @@ with rasterio.open(tif_path) as src:
     north = bounds['_northEast']['lat']
     east = bounds['_northEast']['lng']
 
-    st.write(f"Bounds: South={south}, West={west}, North={north}, East={east}")
+    st.sidebar.write(f"Bounds: South={south}, West={west}, North={north}, East={east}")
 
-    if st.button("Run simulation (crop and resample)"):
-        # Crop and resample the raster to 300x300 grid
+    if st.sidebar.button("Run simulation (crop and resample)"):
+        # Crop and resample the raster grid
         data, transform = crop_and_resample(src, bounds, output_size=(resolution, resolution))
 
         # Show cropped raster image
-        fig = plot_raster(data)
-        st.pyplot(fig)
+        if data.shape[0] >= 3:
+            img = np.dstack([normalize(data[0]), normalize(data[1]), normalize(data[2])])
+        else:
+            img = normalize(data[0])
+        st.image(img, caption="Cropped Raster", use_container_width=True)
