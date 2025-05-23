@@ -51,14 +51,13 @@ st.title("FlameCell Forest Fire Simulator: Select Area by Zoom/Pan")
 tif_path = "maps/DE_10m_3035_tiled.tif"  
 
 st.sidebar.header("Select Area of Interest")
-resolution = st.sidebar.selectbox("Resolution", [128, 256, 512, 1024], index=2)
+resolution = st.sidebar.selectbox("Resolution", [128, 256, 512, 1024], index=0)
 
 with rasterio.open(tif_path) as src:
     # Initial map centered on Germany
     m = folium.Map(location=[51.1657, 10.4515], zoom_start=6)
 
     # Display interactive map with folium and streamlit-folium
-    st.markdown("<div style='height:1px'></div>", unsafe_allow_html=True)
     map_data = st_folium(m, width=700, height=700)
 
     bounds = map_data.get("bounds")
