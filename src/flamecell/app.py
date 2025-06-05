@@ -79,3 +79,4 @@ with rasterio.open(tif_path) as src:
         else:
             img = normalize(data[0])
         st.image(img, caption="Cropped Raster", use_container_width=True)
+        st.dataframe(img)

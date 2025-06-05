@@ -2,7 +2,7 @@ import numpy as np
 
 class Cell:
     def __init__(self, state="EMPTY", health=0):
-        # state can be "EMPTY", "TREE", "FIRE", "ASH", "WATER"
+        # state can be "EMPTY", "TREE", "GRASS", "FIRE", "ASH", "WATER"
         self.state = state
         self.health = health
         # neighbors are relative coordinates
@@ -45,7 +45,7 @@ class Simulation:
 
     def run(self):
         while self.step_count < self.max_steps:
-            print(f"Step {self.step_count}")
+            #print(f"Step {self.step_count}")
             new_states = [[None for _ in range(self.grid.width)] for _ in range(self.grid.height)]
 
             for y in range(self.grid.height):
@@ -83,31 +83,34 @@ def burning(cell, neighbors, state, health):
             return "ASH", 0
     return state, health
 
-# Test run
-width, height = 10, 10
-grid = Grid(width, height)
-# Fill the grid with trees
-for y in range(height):
+def main():
+    # Test run
+    width, height = 10, 10
+    grid = Grid(width, height)
+    # Fill the grid with trees
+    for y in range(height):
+        for x in range(width):
+            grid.cells[y][x].state = "TREE"
+            grid.cells[y][x].health = 3  # Set health for trees
+
+    # set water
     for x in range(width):
-        grid.cells[y][x].state = "TREE"
-        grid.cells[y][x].health = 3  # Set health for trees
+        grid.cells[3][x].state = "WATER"
+        grid.cells[height - 1][x].state = "WATER"
 
-# set water
-for x in range(width):
-    grid.cells[3][x].state = "WATER"
-    grid.cells[height - 1][x].state = "WATER"
+    # Ignite the center
+    grid.cells[height // 2][width // 2].state = "FIRE"
 
-# Ignite the center
-grid.cells[height // 2][width // 2].state = "FIRE"
+    ruleset = RuleSet()
+    ruleset.add_rule(ignite_if_neighbor_burning)
+    ruleset.add_rule(burning)
 
-ruleset = RuleSet()
-ruleset.add_rule(ignite_if_neighbor_burning)
-ruleset.add_rule(burning)
+    sim = Simulation(grid, ruleset)
+    sim.max_steps = 10
+    sim.run()
 
-sim = Simulation(grid, ruleset)
-sim.max_steps = 10
-sim.run()
+    # Print resulting grid states
+    for row in grid.cells:
+        print(" ".join(cell.state[0] for cell in row))
 
-# Print resulting grid states
-for row in grid.cells:
-    print(" ".join(cell.state[0] for cell in row))
+main()
