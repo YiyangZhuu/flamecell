@@ -1,6 +1,8 @@
 # flamecell
 
 ![version](https://img.shields.io/badge/version-0.2.0-blue.svg)
+![license](https://img.shields.io/badge/license-MIT-green.svg)
+![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
 
 A python package to simulate the forest fire using cellular automaton
 
@@ -16,7 +18,12 @@ $ pip install flamecell
 ```
 
 ## Usage
-
+streamlit run src/flamecell/app.py
+In the browser UI:
+1.Select a region on the map.
+2.Generate the simulation grid.
+3.Click to choose fire source.
+4.Run the simulation and watch the fire spread!
 
 ## Contributing
 
