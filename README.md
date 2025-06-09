@@ -19,6 +19,7 @@ $ pip install flamecell
 
 ## Usage
 streamlit run src/flamecell/app.py
+
 In the browser UI:
 
 1.Select a region on the map.
