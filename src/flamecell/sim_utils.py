@@ -30,9 +30,9 @@ def raster_to_grid(data):
             state = raster_to_cell(data[y,x])
             grid.cells[y][x].state = state
             if state == "TREE":
-                grid.cells[y][x].health = 3
+                grid.cells[y][x].health = 10
             elif state =="GRASS":
-                grid.cells[y][x].health = 1
+                grid.cells[y][x].health = 4
     return grid
 
 def grid_to_img(grid):

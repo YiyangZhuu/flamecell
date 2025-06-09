@@ -29,11 +29,11 @@ class RuleSet:
     def add_rule(self, rule):
         self.rules.append(rule)
 
-    def apply(self, cell, neighbors):
+    def apply(self, cell, neighbors, *args, **kwargs):
         new_state = cell.state
         new_health = cell.health
         for rule in self.rules:
-            new_state, new_health = rule(cell, neighbors, new_state, new_health)
+            new_state, new_health = rule(cell, neighbors, new_state, new_health, *args, **kwargs)
         return new_state, new_health
 
 class Simulation:
@@ -71,20 +71,20 @@ class Simulation:
             self.step()
 
 # Rules
-def ignite_if_neighbor_burning(cell, neighbors, state, health):
-    if state == "TREE" or state == "GRASS":
-        for neighbor in neighbors:
-            if neighbor and neighbor.state == "FIRE":
-                return "FIRE", health  # Start burning with health 3
+def ignite(cell, neighbors, state, health, prob=0.2, humidity=0.4):
+    if state in ["TREE", "GRASS"]:
+        neighbor_on_fire = sum(1 for neighbor in neighbors if neighbor and neighbor.state == "FIRE")
+        if np.random.rand() < neighbor_on_fire * prob * (1 - humidity):
+            return "FIRE", health  # Start burning
     return state, health
-
 
 def burning(cell, neighbors, state, health):
     if state == "FIRE":
-        health -= 1
+        health -= np.random.randint(1,3)
         if health <= 0:
             return "ASH", 0
     return state, health
+
 
 def main():
     # Test run
@@ -105,7 +105,7 @@ def main():
     grid.cells[height // 2][width // 2].state = "FIRE"
 
     ruleset = RuleSet()
-    ruleset.add_rule(ignite_if_neighbor_burning)
+    ruleset.add_rule(ignite)
     ruleset.add_rule(burning)
 
     sim = Simulation(grid, ruleset)

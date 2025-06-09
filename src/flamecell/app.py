@@ -7,7 +7,7 @@ from rasterio.windows import from_bounds
 from rasterio.enums import Resampling
 from rasterio.warp import transform_bounds
 import numpy as np
-
+import time
 from sim_utils import *
 from flamecell import *
 
@@ -80,8 +80,8 @@ with rasterio.open(tif_path) as src:
         st.session_state.img = None
     if 'data' not in st.session_state:
         st.session_state.data = None
-    if 'ruleset' not in st.session_state:
-        st.session_state.ruleset = None
+    #if 'ruleset' not in st.session_state:
+     #   st.session_state.ruleset = None
     if 'sim' not in st.session_state:
         st.session_state.sim = None
 
@@ -108,22 +108,30 @@ with rasterio.open(tif_path) as src:
         frac = resolution / coords["width"]
         fire_source = (round(coords["x"] * frac), round(coords["y"] * frac))
         
-        if st.session_state.grid.cells[fire_source[1], fire_source[0]].state == "TREE" or st.session_state.grid.cells[fire_source[0], fire_source[1]].state == "GRASS":
+        if st.session_state.grid.cells[fire_source[1], fire_source[0]].state in ["TREE", "GRASS"]:
             st.session_state.grid.cells[fire_source[1], fire_source[0]].state = "FIRE"
             st.session_state.img = grid_to_img(st.session_state.grid)
             st.rerun()
 
-    if st.sidebar.button("Step Simulation"):
-        st.session_state.ruleset = RuleSet()
-        st.session_state.ruleset.add_rule(ignite_if_neighbor_burning)
-        st.session_state.ruleset.add_rule(burning)
-        st.session_state.sim = Simulation(st.session_state.grid, st.session_state.ruleset)
-        st.session_state.sim.max_steps = resolution
-        for _ in range(st.session_state.sim.max_steps):
-            st.write(_)
-            st.session_state.sim.step()
-            st.session_state.img = grid_to_img(st.session_state.grid)
-            st.rerun()
+    if st.sidebar.button("Run Simulation"):
+        ruleset = RuleSet()
+        ruleset.add_rule(burning)
+        ruleset.add_rule(ignite)
+
+        # Reuse existing grid (assumed to have fire source already set)
+        sim = Simulation(st.session_state.grid, ruleset)
+        sim.max_steps = resolution
+        st.session_state.sim
+
+        # Create a placeholder for dynamic plot
+        plot_area = st.empty()
+
+        # Run and update
+        while sim.step_count < sim.max_steps:
+            sim.step()
+            fig = plot_grid(st.session_state.grid)
+            plot_area.pyplot(fig, use_container_width=True)
+            # time.sleep(0.1)  # optional: slow down to see progress
 
 
         
