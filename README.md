@@ -4,8 +4,6 @@ A python package to simulate the forest fire using cellular automaton
 
 ## TODO
 - [ ] Figure out how to download the map file (too large 466 mb)
-- [ ] streamlit user interface
-- [ ] connect app and source code to perform simulation
 - [ ] try use real world wind data (direction, velocity)
 - [ ] height?
 
