@@ -20,9 +20,13 @@ $ pip install flamecell
 ## Usage
 streamlit run src/flamecell/app.py
 In the browser UI:
+
 1.Select a region on the map.
+
 2.Generate the simulation grid.
+
 3.Click to choose fire source.
+
 4.Run the simulation and watch the fire spread!
 
 ## Contributing
