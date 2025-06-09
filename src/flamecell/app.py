@@ -1,13 +1,17 @@
 import streamlit as st
 from streamlit_folium import st_folium
+from streamlit_image_coordinates import streamlit_image_coordinates
 import folium
 import rasterio
 from rasterio.windows import from_bounds
 from rasterio.enums import Resampling
 from rasterio.warp import transform_bounds
 import numpy as np
-import matplotlib.pyplot as plt
 
+from sim_utils import *
+from flamecell import *
+
+# Path to data map
 TIF_PATH = "maps\DE_10m_3035_tiled.tif"
 
 def crop_and_resample(src, bounds, output_size=(128, 128)):
@@ -33,7 +37,7 @@ def crop_and_resample(src, bounds, output_size=(128, 128)):
             output_size[1],  # height
             output_size[0]   # width
         ),
-        resampling=Resampling.bilinear,
+        resampling=Resampling.nearest,
     )
     return data, transform
 
@@ -43,6 +47,7 @@ def normalize(arr):
     arr /= arr.max()
     arr *= 255
     return arr.astype('uint8')
+
 
 # --- Streamlit app ---
 st.title("FlameCell Forest Fire Simulator: Select Area by Zoom/Pan")
@@ -69,14 +74,56 @@ with rasterio.open(tif_path) as src:
 
     st.sidebar.write(f"Bounds: South={south}, West={west}, North={north}, East={east}")
 
-    if st.sidebar.button("Run simulation (crop and resample)"):
-        # Crop and resample the raster grid
-        data, transform = crop_and_resample(src, bounds, output_size=(resolution, resolution))
+    if 'grid' not in st.session_state:
+        st.session_state.grid = None
+    if 'img' not in st.session_state:
+        st.session_state.img = None
+    if 'data' not in st.session_state:
+        st.session_state.data = None
+    if 'ruleset' not in st.session_state:
+        st.session_state.ruleset = None
+    if 'sim' not in st.session_state:
+        st.session_state.sim = None
 
-        # Show cropped raster image
-        if data.shape[0] >= 3:
-            img = np.dstack([normalize(data[0]), normalize(data[1]), normalize(data[2])])
-        else:
-            img = normalize(data[0])
-        st.image(img, caption="Cropped Raster", use_container_width=True)
-        st.dataframe(img)
+    if st.sidebar.button("Generate Grid"):
+        # Crop and resample the raster grid
+        st.session_state.data, transform = crop_and_resample(src, bounds, output_size=(resolution, resolution))
+        # Convert the raster to simulation grid
+        st.session_state.grid = raster_to_grid(st.session_state.data[0])
+        st.session_state.img = grid_to_img(st.session_state.grid)
+        st.rerun()
+    
+    if st.sidebar.button("Reset"):
+        st.session_state.grid = raster_to_grid(st.session_state.data[0])
+        st.session_state.img = grid_to_img(st.session_state.grid)
+        st.rerun()
+        
+        # Show the image and let user click to set fire
+    if st.session_state.img is not None:
+        st.subheader("Click to set fire")
+        coords = streamlit_image_coordinates(st.session_state.img, width=512, key="set_fire")
+        
+    # calculate the fire source on the grid    
+    if coords is not None:
+        frac = resolution / coords["width"]
+        fire_source = (round(coords["x"] * frac), round(coords["y"] * frac))
+        
+        if st.session_state.grid.cells[fire_source[1], fire_source[0]].state == "TREE" or st.session_state.grid.cells[fire_source[0], fire_source[1]].state == "GRASS":
+            st.session_state.grid.cells[fire_source[1], fire_source[0]].state = "FIRE"
+            st.session_state.img = grid_to_img(st.session_state.grid)
+            st.rerun()
+
+    if st.sidebar.button("Step Simulation"):
+        st.session_state.ruleset = RuleSet()
+        st.session_state.ruleset.add_rule(ignite_if_neighbor_burning)
+        st.session_state.ruleset.add_rule(burning)
+        st.session_state.sim = Simulation(st.session_state.grid, st.session_state.ruleset)
+        st.session_state.sim.max_steps = resolution
+        for _ in range(st.session_state.sim.max_steps):
+            st.write(_)
+            st.session_state.sim.step()
+            st.session_state.img = grid_to_img(st.session_state.grid)
+            st.rerun()
+
+
+        

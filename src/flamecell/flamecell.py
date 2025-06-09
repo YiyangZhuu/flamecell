@@ -43,36 +43,39 @@ class Simulation:
         self.step_count = 0
         self.max_steps = 1000
 
+    def step(self):
+        #print(f"Step {self.step_count}")
+        new_states = [[None for _ in range(self.grid.width)] for _ in range(self.grid.height)]
+
+        for y in range(self.grid.height):
+            for x in range(self.grid.width):
+                cell = self.grid.cells[y][x]
+                neighbors = [
+                    self.grid.get_state(x + dx, y + dy)
+                    for dx, dy in cell.neighbors
+                    if self.grid.get_state(x + dx, y + dy) is not None
+                ]
+                new_states[y][x] = self.ruleset.apply(cell, neighbors)
+
+        # Apply new states
+        for y in range(self.grid.height):
+            for x in range(self.grid.width):
+                state, health = new_states[y][x]
+                self.grid.cells[y][x].state = state
+                self.grid.cells[y][x].health = health
+        
+        self.step_count += 1
+
     def run(self):
         while self.step_count < self.max_steps:
-            #print(f"Step {self.step_count}")
-            new_states = [[None for _ in range(self.grid.width)] for _ in range(self.grid.height)]
-
-            for y in range(self.grid.height):
-                for x in range(self.grid.width):
-                    cell = self.grid.cells[y][x]
-                    neighbors = [
-                        self.grid.get_state(x + dx, y + dy)
-                        for dx, dy in cell.neighbors
-                        if self.grid.get_state(x + dx, y + dy) is not None
-                    ]
-                    new_states[y][x] = self.ruleset.apply(cell, neighbors)
-
-            # Apply new states
-            for y in range(self.grid.height):
-                for x in range(self.grid.width):
-                    state, health = new_states[y][x]
-                    self.grid.cells[y][x].state = state
-                    self.grid.cells[y][x].health = health
-            
-            self.step_count += 1
+            self.step()
 
 # Rules
 def ignite_if_neighbor_burning(cell, neighbors, state, health):
-    if state == "TREE":
+    if state == "TREE" or state == "GRASS":
         for neighbor in neighbors:
             if neighbor and neighbor.state == "FIRE":
-                return "FIRE", 3  # Start burning with health 3
+                return "FIRE", health  # Start burning with health 3
     return state, health
 
 
@@ -113,4 +116,4 @@ def main():
     for row in grid.cells:
         print(" ".join(cell.state[0] for cell in row))
 
-main()
+# main()
