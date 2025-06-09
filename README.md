@@ -1,5 +1,7 @@
 # flamecell
 
+![version](https://img.shields.io/badge/version-0.2.0-blue.svg)
+
 A python package to simulate the forest fire using cellular automaton
 
 ## TODO
