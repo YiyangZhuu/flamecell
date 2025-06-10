@@ -90,8 +90,8 @@ with rasterio.open(tif_path) as src:
         wdir = st.sidebar.number_input("Enter custom wind direction", min_value=0, max_value=360, value=0)
         wspd = st.sidebar.number_input("Enter custom wind speed", min_value=0, value=0)
     cell_length = abs(south-north) * 111.32 / resolution
-    wind = 0.001/cell_length * np.array([wspd*np.cos(np.radians(wdir)), wspd*np.sin(np.radians(wdir))])
-    #wind = np.array([wspd*np.cos(np.radians(wdir)), wspd*np.sin(np.radians(wdir))])
+    #wind = 0.001/cell_length * np.array([wspd*np.cos(np.radians(wdir)), wspd*np.sin(np.radians(wdir))])
+    wind = np.array([wspd*np.cos(np.radians(wdir)), wspd*np.sin(np.radians(wdir))])
     st.write(wind)
     #dis_wind = np.round(wind)
     #prob_wind = abs(wind-dis_wind)
@@ -130,8 +130,8 @@ with rasterio.open(tif_path) as src:
         frac = resolution / coords["width"]
         fire_source = (round(coords["x"] * frac), round(coords["y"] * frac))
         
-        if st.session_state.grid.cells[fire_source[1], fire_source[0]].state in ["TREE", "GRASS"]:
-            st.session_state.grid.cells[fire_source[1], fire_source[0]].state = "FIRE"
+        if st.session_state.grid.state[fire_source[1], fire_source[0]] in ["TREE", "GRASS"]:
+            st.session_state.grid.state[fire_source[1], fire_source[0]] = "FIRE"
             st.session_state.img = grid_to_img(st.session_state.grid)
             st.rerun()
 

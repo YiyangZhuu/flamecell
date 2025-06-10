@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import requests
 
+
 # color map for visualization [0.0, 1.0]
 color_map = {
     "FIRE": (1.0, 0.5, 0),
@@ -29,27 +30,27 @@ def raster_to_grid(data):
     for y in range(height):
         for x in range(width):
             state = raster_to_cell(data[y,x])
-            grid.cells[y][x].state = state
+            grid.state[y, x] = state
             if state == "TREE":
-                grid.cells[y][x].health = 10
+                grid.health[y, x] = 10
             elif state =="GRASS":
-                grid.cells[y][x].health = 4
+                grid.health[y, x] = 4
     return grid
 
 def grid_to_img(grid):
     img = np.zeros((grid.height, grid.width, 3), dtype=np.uint8)
     for y in range(grid.height):
         for x in range(grid.width):
-            img[y, x, 0] = color_map[grid.cells[y][x].state][0] * 255
-            img[y, x, 1] = color_map[grid.cells[y][x].state][1] * 255
-            img[y, x, 2] = color_map[grid.cells[y][x].state][2] * 255
+            img[y, x, 0] = color_map[grid.state[y][x]][0] * 255
+            img[y, x, 1] = color_map[grid.state[y][x]][1] * 255
+            img[y, x, 2] = color_map[grid.state[y][x]][2] * 255
     return img 
 
 def plot_grid(grid):
     img = np.zeros((grid.height, grid.width, 3))
     for y in range(grid.height):
         for x in range(grid.width):
-            img[y, x] = color_map[grid.cells[y][x].state]
+            img[y, x] = color_map[grid.state[y][x]]
 
     fig, ax = plt.subplots()
     ax.imshow(img, interpolation='none')
@@ -77,3 +78,4 @@ def get_current_wind(lat, lon):
         return wind_speed, wind_direction
     except Exception as e:
         return str(e), None
+
