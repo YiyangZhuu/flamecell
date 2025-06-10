@@ -7,9 +7,9 @@ class Cell:
         self.health = health
         # neighbors are relative coordinates
         # e.g. (-1, 0) means left neighbor
-        self.neighbors = [(dx, dy) for dx in [-1, 0, 1]
-                          for dy in [-1, 0, 1]
-                          if not (dx == 0 and dy == 0)]
+        self.neighbors_index = [(dx, dy) for dx in [-1, 0, 1]
+                                for dy in [-1, 0, 1]
+                                if not (dx == 0 and dy == 0)]
 
 class Grid:
     def __init__(self, width, height):
@@ -46,20 +46,17 @@ class Simulation:
     def step(self, prob=0.2, humidity=0.4, wind=np.array([0,0])):
         #print(f"Step {self.step_count}")
         new_states = [[None for _ in range(self.grid.width)] for _ in range(self.grid.height)]
-        dx_wind = int(wind[0])
-        dy_wind = int(wind[1])
         for y in range(self.grid.height):
             for x in range(self.grid.width):
                 cell = self.grid.cells[y][x]
                 neighbors = []
-                for dx, dy in cell.neighbors:
-                    nx = x + dx + dx_wind
-                    ny = y + dy + dy_wind
-
+                for dx, dy in cell.neighbors_index:
+                    nx = x + dx
+                    ny = y + dy
                     neighbor = self.grid.get_state(nx, ny)
                     if neighbor is not None:
-                        neighbors.append(neighbor)
-                new_states[y][x] = self.ruleset.apply(cell, neighbors, prob=0.2, humidity=0.4, wind=np.array([0,0]))
+                        neighbors.append((neighbor, dx, dy))
+                new_states[y][x] = self.ruleset.apply(cell, neighbors, prob=0.2, humidity=0.4, wind=wind)
 
         # Apply new states
         for y in range(self.grid.height):
@@ -72,10 +69,13 @@ class Simulation:
 
 # Rules
 # ignite under certain probability, humidity and wind
-def ignite(cell, neighbors, state, health, prob=0.2, humidity=0.4, **kwargs):
+def ignite(cell, neighbors, state, health, prob=0.15, humidity=0.4, wind=np.array([0,0]), **kwargs):
     if state in ["TREE", "GRASS"]:
-        neighbor_on_fire = sum(1 for neighbor in neighbors if neighbor and neighbor.state == "FIRE")
-        if np.random.rand() < neighbor_on_fire * prob * (1 - humidity):
+        ignition_prob = 0.0
+        for neighbor, dx, dy in neighbors:
+            if neighbor and neighbor.state == "FIRE":
+                ignition_prob += 1 + (dx * wind[0] + dy * wind[1]) * 0.3     
+        if np.random.rand() < ignition_prob * prob * (1 - humidity):
             return "FIRE", health  # Start burning
     return state, health
 

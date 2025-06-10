@@ -91,9 +91,11 @@ with rasterio.open(tif_path) as src:
         wspd = st.sidebar.number_input("Enter custom wind speed", min_value=0, value=0)
     cell_length = abs(south-north) * 111.32 / resolution
     wind = 0.001/cell_length * np.array([wspd*np.cos(np.radians(wdir)), wspd*np.sin(np.radians(wdir))])
-    dis_wind = np.round(wind)
+    #wind = np.array([wspd*np.cos(np.radians(wdir)), wspd*np.sin(np.radians(wdir))])
+    st.write(wind)
+    #dis_wind = np.round(wind)
     #prob_wind = abs(wind-dis_wind)
-    st.write(dis_wind)
+    #st.write(dis_wind)
     #st.write(prob_wind)
 
     if 'grid' not in st.session_state:
@@ -148,7 +150,7 @@ with rasterio.open(tif_path) as src:
 
         # Run and update
         while sim.step_count < sim.max_steps:
-            sim.step(wind=dis_wind)
+            sim.step(wind=wind)
             fig = plot_grid(st.session_state.grid)
             plot_area.pyplot(fig, use_container_width=True)
             # time.sleep(0.1)  # optional: slow down to see progress
