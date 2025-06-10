@@ -1,9 +1,11 @@
 # download_data.py
-import urllib.request
+from urllib.request import urlretrieve
 
-url = "https://heidata.uni-heidelberg.de/file.xhtml?fileId=23053&version=2.0#"  
-output_path = "maps/test.tif"
+def download_tif(file_id, out_path):
+    url = "https://heidata.uni-heidelberg.de/file.xhtml?fileId={file_id}&version=2.0"
+    dst = out_path
+    print("downloading...")
+    urlretrieve(url, dst)
 
-print("Downloading data...")
-urllib.request.urlretrieve(url, output_path)
-print("Download complete.")
+
+download_tif(23030, "maps/CY_landuse_10m.tif")

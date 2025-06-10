@@ -1,6 +1,7 @@
 from flamecell import Grid
 import numpy as np
 import matplotlib.pyplot as plt
+import requests
 
 # color map for visualization [0.0, 1.0]
 color_map = {
@@ -55,3 +56,24 @@ def plot_grid(grid):
     ax.set_xticks([])
     ax.set_yticks([])
     return fig
+
+def get_current_wind(lat, lon):
+    """
+    Get current wind speed and direction using Open-Meteo API.
+    Returns:
+        wind_speed (float): in m/s
+        wind_direction (float): in degrees (0° is North, 90° is East)
+    """
+    url = (
+        f"https://api.open-meteo.com/v1/forecast?"
+        f"latitude={lat}&longitude={lon}&current=wind_speed_10m,wind_direction_10m"
+    )
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        wind_speed = data['current']['wind_speed_10m']
+        wind_direction = data['current']['wind_direction_10m']
+        return wind_speed, wind_direction
+    except Exception as e:
+        return str(e), None

@@ -55,8 +55,8 @@ st.title("FlameCell Forest Fire Simulator: Select Area by Zoom/Pan")
 # Load big TIF map
 tif_path = "maps/DE_10m_3035_tiled.tif"  
 
-st.sidebar.header("Select Area of Interest")
-resolution = st.sidebar.selectbox("Resolution", [128, 256, 512, 1024], index=0)
+
+    
 
 with rasterio.open(tif_path) as src:
     # Initial map centered on Germany
@@ -72,7 +72,29 @@ with rasterio.open(tif_path) as src:
     north = bounds['_northEast']['lat']
     east = bounds['_northEast']['lng']
 
-    st.sidebar.write(f"Bounds: South={south}, West={west}, North={north}, East={east}")
+    st.sidebar.write(f"Bounds:")
+    st.sidebar.write(f"South={south}, West={west}, North={north}, East={east}")
+
+    # desired resolution for the grid
+    resolution = st.sidebar.selectbox("Resolution", [128, 256, 512, 1024, "Custom"], index=0)
+    if resolution == "Custom":
+        resolution = st.sidebar.number_input("Enter custom resolution", min_value=10, max_value=2000, value=256, step=1)
+
+    # get wind info from meteo or custom
+    wind_source = st.sidebar.selectbox("Wind", ["Current", "Custom"])
+    if wind_source == "Current":
+        wspd, wdir = get_current_wind((south+north)/2, (west+east)/2)
+        st.sidebar.write(f"Current wind speed: {wspd} km/h")
+        st.sidebar.write(f"Current wind direction: {wdir} Degree")
+    if wind_source == "Custom":
+        wdir = st.sidebar.number_input("Enter custom wind direction", min_value=0, max_value=360, value=0)
+        wspd = st.sidebar.number_input("Enter custom wind speed", min_value=0, value=0)
+    cell_length = abs(south-north) * 111.32 / resolution
+    wind = 0.001/cell_length * np.array([wspd*np.cos(np.radians(wdir)), wspd*np.sin(np.radians(wdir))])
+    dis_wind = np.round(wind)
+    #prob_wind = abs(wind-dis_wind)
+    st.write(dis_wind)
+    #st.write(prob_wind)
 
     if 'grid' not in st.session_state:
         st.session_state.grid = None
@@ -80,8 +102,6 @@ with rasterio.open(tif_path) as src:
         st.session_state.img = None
     if 'data' not in st.session_state:
         st.session_state.data = None
-    #if 'ruleset' not in st.session_state:
-     #   st.session_state.ruleset = None
     if 'sim' not in st.session_state:
         st.session_state.sim = None
 
@@ -128,7 +148,7 @@ with rasterio.open(tif_path) as src:
 
         # Run and update
         while sim.step_count < sim.max_steps:
-            sim.step()
+            sim.step(wind=dis_wind)
             fig = plot_grid(st.session_state.grid)
             plot_area.pyplot(fig, use_container_width=True)
             # time.sleep(0.1)  # optional: slow down to see progress

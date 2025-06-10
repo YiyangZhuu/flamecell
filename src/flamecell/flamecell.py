@@ -29,11 +29,11 @@ class RuleSet:
     def add_rule(self, rule):
         self.rules.append(rule)
 
-    def apply(self, cell, neighbors, *args, **kwargs):
+    def apply(self, cell, neighbors, **kwargs):
         new_state = cell.state
         new_health = cell.health
         for rule in self.rules:
-            new_state, new_health = rule(cell, neighbors, new_state, new_health, *args, **kwargs)
+            new_state, new_health = rule(cell, neighbors, new_state, new_health, **kwargs)
         return new_state, new_health
 
 class Simulation:
@@ -43,19 +43,23 @@ class Simulation:
         self.step_count = 0
         self.max_steps = 1000
 
-    def step(self):
+    def step(self, prob=0.2, humidity=0.4, wind=np.array([0,0])):
         #print(f"Step {self.step_count}")
         new_states = [[None for _ in range(self.grid.width)] for _ in range(self.grid.height)]
-
+        dx_wind = int(wind[0])
+        dy_wind = int(wind[1])
         for y in range(self.grid.height):
             for x in range(self.grid.width):
                 cell = self.grid.cells[y][x]
-                neighbors = [
-                    self.grid.get_state(x + dx, y + dy)
-                    for dx, dy in cell.neighbors
-                    if self.grid.get_state(x + dx, y + dy) is not None
-                ]
-                new_states[y][x] = self.ruleset.apply(cell, neighbors)
+                neighbors = []
+                for dx, dy in cell.neighbors:
+                    nx = x + dx + dx_wind
+                    ny = y + dy + dy_wind
+
+                    neighbor = self.grid.get_state(nx, ny)
+                    if neighbor is not None:
+                        neighbors.append(neighbor)
+                new_states[y][x] = self.ruleset.apply(cell, neighbors, prob=0.2, humidity=0.4, wind=np.array([0,0]))
 
         # Apply new states
         for y in range(self.grid.height):
@@ -66,19 +70,16 @@ class Simulation:
         
         self.step_count += 1
 
-    def run(self):
-        while self.step_count < self.max_steps:
-            self.step()
-
 # Rules
-def ignite(cell, neighbors, state, health, prob=0.2, humidity=0.4):
+# ignite under certain probability, humidity and wind
+def ignite(cell, neighbors, state, health, prob=0.2, humidity=0.4, **kwargs):
     if state in ["TREE", "GRASS"]:
         neighbor_on_fire = sum(1 for neighbor in neighbors if neighbor and neighbor.state == "FIRE")
         if np.random.rand() < neighbor_on_fire * prob * (1 - humidity):
             return "FIRE", health  # Start burning
     return state, health
 
-def burning(cell, neighbors, state, health):
+def burning(cell, neighbors, state, health, **kwargs):
     if state == "FIRE":
         health -= np.random.randint(1,3)
         if health <= 0:
