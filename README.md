@@ -4,10 +4,15 @@
 ![license](https://img.shields.io/badge/license-MIT-green.svg)
 ![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
 
-A python package to simulate the forest fire using cellular automaton
+'flamecell' is a Python package to simulate forest fire dynamics using a cellular 
+It features wind and humidity effects, real world map-based inputs, and an interactive Streamlit interface.
 
-## TODO
-- [ ] Figure out how to download the map file (too large 466 mb)
+## Features
+- Cellular automaton for wildfire spread
+- Environmental effects: **wind** and **humidity**
+- Real map raster input support (land cover)
+- Streamlit web interface for interactive control
+- Visualization of fire spread with color-coded maps
 
 ## Installation
 
@@ -15,18 +20,38 @@ A python package to simulate the forest fire using cellular automaton
 $ pip install flamecell
 ```
 
-## Usage
-streamlit run src/flamecell/app.py
+or clone the repository
+```bash
+git clone https://github.com/YiyangZhuu/flamecell.git
+cd flamecell
+pip install -e
+```
 
-In the browser UI:
+## Quick Start
+Run the app with streamlit to start
+```bash
+streamlit run src/flamecell/app.py
+```
+
+Then follow the steps in the browser:
 
 1.Select a region on the map.
 
-2.Generate the simulation grid.
+2.Select desired resolution and wind on the sidebar
 
-3.Click to choose fire source.
+3.Generate the simulation grid.
 
-4.Run the simulation and watch the fire spread!
+4.Click to choose fire source.
+
+5.Run the simulation and watch the fire spread!
+
+## Note on Map Data
+Map data for the whole Germany is large (~466 MB). We're working on hosting or streamlining the download
+
+For now: Manually ['download'](https://heidata.uni-heidelberg.de/dataset.xhtml?persistentId=doi:10.11588/data/IUTCDN) the .tif file and place it under src/flamcell/maps. 
+
+You can also download other EU country's map, just change the `TIF_PATH` in the app.py to the map's name
+
 
 ## Contributing
 

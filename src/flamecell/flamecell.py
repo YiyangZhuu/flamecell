@@ -1,4 +1,4 @@
-import numpy as np
+from rules.py import * 
 
 class Grid:
     def __init__(self, width, height):
@@ -63,55 +63,3 @@ class Simulation:
         self.grid.health = new_health
         self.step_count += 1
 
-
-# Rules
-# ignite under certain probability, humidity and wind
-def ignite(x, y, state, health, neighbors, prob=0.15, humidity=0.4, wind=np.array([0,0]), **kwargs):
-    if state in ["TREE", "GRASS"]:
-        ignition_prob = 0.0
-        for neighbor_state, dx, dy in neighbors:
-            if neighbor_state == "FIRE":
-                ignition_prob += 1 + (dx * wind[0] + dy * wind[1]) * 0.05     
-        if np.random.rand() < ignition_prob * prob * (1 - humidity):
-            return "FIRE", health  # Start burning
-    return state, health
-
-def burning(x, y, state, health, neighbors, **kwargs):
-    if state == "FIRE":
-        health -= np.random.randint(1,3)
-        if health <= 0:
-            return "ASH", 0
-    return state, health
-
-
-def main():
-    # Test run
-    width, height = 10, 10
-    grid = Grid(width, height)
-    # Fill the grid with trees
-    for y in range(height):
-        for x in range(width):
-            grid.cells[y][x].state = "TREE"
-            grid.cells[y][x].health = 3  # Set health for trees
-
-    # set water
-    for x in range(width):
-        grid.cells[3][x].state = "WATER"
-        grid.cells[height - 1][x].state = "WATER"
-
-    # Ignite the center
-    grid.cells[height // 2][width // 2].state = "FIRE"
-
-    ruleset = RuleSet()
-    ruleset.add_rule(ignite)
-    ruleset.add_rule(burning)
-
-    sim = Simulation(grid, ruleset)
-    sim.max_steps = 10
-    sim.run()
-
-    # Print resulting grid states
-    for row in grid.cells:
-        print(" ".join(cell.state[0] for cell in row))
-
-# main()
