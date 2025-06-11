@@ -1,4 +1,5 @@
 import numpy as np
+
 # Rules
 # ignite under certain probability, humidity and wind
 def ignite(x, y, state, health, neighbors, prob=0.15, humidity=0.4, wind=np.array([0,0]), **kwargs):

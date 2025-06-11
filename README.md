@@ -7,6 +7,10 @@
 'flamecell' is a Python package to simulate forest fire dynamics using a cellular 
 It features wind and humidity effects, real world map-based inputs, and an interactive Streamlit interface.
 
+## TODO
+- [ ] Add Temperature?
+- [ ] Fire risk assessment?
+
 ## Features
 - Cellular automaton for wildfire spread
 - Environmental effects: **wind** and **humidity**

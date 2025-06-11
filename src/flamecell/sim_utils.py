@@ -58,6 +58,23 @@ def plot_grid(grid):
     ax.set_yticks([])
     return fig
 
+def plot_risk_map(sim):
+    base = np.zeros((sim.grid.height, sim.grid.width, 3))
+    for y in range(sim.grid.height):
+        for x in range(sim.grid.width):
+            base[y, x] = color_map[sim.grid.state[y][x]]
+
+    fig, ax = plt.subplots()
+    ax.imshow(base, interpolation='none')
+
+    # Overlay risk heatmap in red scale with transparency
+    heat = ax.imshow(sim.ignite_time, cmap='hot', alpha=0.4, interpolation='none')
+
+    ax.set_xticks([])
+    ax.set_yticks([])
+    return fig
+
+
 def get_current_wind(lat, lon):
     """
     Get current wind speed and direction using Open-Meteo API.

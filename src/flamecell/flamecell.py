@@ -1,4 +1,4 @@
-from rules.py import * 
+from rules import * 
 
 class Grid:
     def __init__(self, width, height):
@@ -37,6 +37,7 @@ class Simulation:
         self.ruleset = ruleset
         self.step_count = 0
         self.max_steps = 1000
+        self.ignite_time = np.zeros_like(grid.state, dtype=np.int32)
 
     def step(self, prob=0.2, humidity=0.4, wind=np.array([0,0])):
         # Seperate the loop for njit optimization
@@ -44,6 +45,8 @@ class Simulation:
         new_health = self.grid.health.copy()
         for y in range(self.grid.height):
             for x in range(self.grid.width):
+                if new_state[y, x] == "FIRE":
+                    self.ignite_time[y, x] = self.step_count
                 # calculate neighbors
                 neighbors = []
                 for dy in [-1, 0, 1]:

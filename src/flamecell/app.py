@@ -37,7 +37,8 @@ def crop_and_resample(src, bounds, output_size=(128, 128)):
             output_size[1],  # height
             output_size[0]   # width
         ),
-        resampling=Resampling.nearest,
+        #resampling=Resampling.nearest,
+        resampling=Resampling.mode,
     )
     return data, transform
 
@@ -154,6 +155,10 @@ with rasterio.open(tif_path) as src:
             fig = plot_grid(st.session_state.grid)
             plot_area.pyplot(fig, use_container_width=True)
             # time.sleep(0.1)  # optional: slow down to see progress
+        
+        # plot risk map
+        risk_fig = plot_risk_map(sim)
+        plot_area.pyplot(risk_fig, use_container_width=True)
 
 
         
