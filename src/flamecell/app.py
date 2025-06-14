@@ -93,7 +93,7 @@ with rasterio.open(tif_path) as src:
     cell_length = abs(south-north) * 111.32 / resolution
     #wind = 0.001/cell_length * np.array([wspd*np.cos(np.radians(wdir)), wspd*np.sin(np.radians(wdir))])
     wind = np.array([wspd*np.cos(np.radians(wdir)), wspd*np.sin(np.radians(wdir))])
-    st.write(wind)
+    #st.write(wind)
     #dis_wind = np.round(wind)
     #prob_wind = abs(wind-dis_wind)
     #st.write(dis_wind)
@@ -136,6 +136,10 @@ with rasterio.open(tif_path) as src:
             st.session_state.img = grid_to_img(st.session_state.grid)
             st.rerun()
 
+    st.sidebar.write("Choose Parameters")
+    prob = st.sidebar.slider("Ignition Probability per Neighbor on fire", min_value=0.0, max_value=1.0, value=0.2, step=0.01)
+    humidity = st.sidebar.slider("Humidity", min_value=0.0, max_value=1.0, value=0.4, step=0.01)
+
     if st.sidebar.button("Run Simulation"):
         ruleset = RuleSet()
         ruleset.add_rule(burning)
@@ -151,7 +155,7 @@ with rasterio.open(tif_path) as src:
 
         # Run and update
         while sim.step_count < sim.max_steps:
-            sim.step(wind=wind)
+            sim.step(prob=prob, humidity=humidity, wind=wind)
             fig = plot_grid(st.session_state.grid)
             plot_area.pyplot(fig, use_container_width=True)
             # time.sleep(0.1)  # optional: slow down to see progress
