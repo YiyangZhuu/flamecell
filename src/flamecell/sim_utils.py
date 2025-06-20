@@ -16,16 +16,6 @@ class Grid:
         self.state = np.full((height, width), "EMPTY", dtype=object)
         self.health = np.zeros((height, width), dtype=int)
 
-    def get_cell(self, x, y):
-        if 0 <= x < self.width and 0 <= y < self.height:
-            return self.state[y, x], self.health[y, x]
-        return None, None
-
-    def set_cell(self, x, y, state, health):
-        if 0 <= x < self.width and 0 <= y < self.height:
-            self.state[y, x] = state
-            self.health[y, x] = health
-
 class RuleSet:
     def __init__(self):
         self.rules = []
