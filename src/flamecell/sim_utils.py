@@ -7,6 +7,10 @@ from .rules import *
 
 class Grid:
     def __init__(self, width, height):
+        if not isinstance(width, int) or width <= 0:
+            raise ValueError("Width must be a positive integer")
+        if not isinstance(height, int) or height <= 0:
+            raise ValueError("Height must be a positive integer")
         self.width = width
         self.height = height
         self.state = np.full((height, width), "EMPTY", dtype=object)
