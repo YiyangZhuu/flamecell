@@ -66,8 +66,12 @@ def test_simulation_step_count_increments():
     (31, "TREE"),
     (32, "GRASS"),
     (22, "GRASS"),
-    (1, "EMPTY"),
-    ("0", TypeError)
+    (1, "EMPTY")
 ])
 def test_raster_to_cell(value, expected):
     assert raster_to_cell(value) == expected
+
+def test_raster_to_cell_type_error():
+    with pytest.raises(TypeError):
+        raster_to_cell("0")
+
