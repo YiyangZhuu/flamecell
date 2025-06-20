@@ -1,6 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import requests
+from rasterio.windows import from_bounds
+from rasterio.enums import Resampling
+from rasterio.warp import transform_bounds
 from rules import * 
 
 class Grid:
@@ -162,4 +165,39 @@ def get_current_wind(lat, lon):
         return wind_speed, wind_direction
     except Exception as e:
         return str(e), None
+
+def crop_and_resample(src, bounds, output_size=(128, 128)):
+    """Crop raster to bounds and resample to output_size (width, height)."""
+    south = bounds['_southWest']['lat']
+    west = bounds['_southWest']['lng']
+    north = bounds['_northEast']['lat']
+    east = bounds['_northEast']['lng']
+
+    src_crs = src.crs  # Get CRS from the raster dataset
+    bounds_projected = transform_bounds('EPSG:4326', src_crs, west, south, east, north)
+    # Create window from bounds
+    window = from_bounds(*bounds_projected, transform=src.transform)
+
+    # Calculate the transform and shape of the windowed output
+    transform = src.window_transform(window)
+    
+    # Read and resample the data in the window
+    data = src.read(
+        window=window,
+        out_shape=(
+            src.count,  # number of bands
+            output_size[1],  # height
+            output_size[0]   # width
+        ),
+        #resampling=Resampling.nearest,
+        resampling=Resampling.mode,
+    )
+    return data, transform
+
+def normalize(arr):
+    arr = arr.astype('float32')
+    arr -= arr.min()
+    arr /= arr.max()
+    arr *= 255
+    return arr.astype('uint8')
 
