@@ -12,7 +12,7 @@ from sim_utils import *
 from flamecell import *
 
 # Path to data map
-TIF_PATH = "maps\DE_10m_3035_tiled.tif"
+TIF_PATH = "data\DE_10m_3035_tiled.tif"
 
 def crop_and_resample(src, bounds, output_size=(128, 128)):
     """Crop raster to bounds and resample to output_size (width, height)."""
@@ -53,13 +53,7 @@ def normalize(arr):
 # --- Streamlit app ---
 st.title("FlameCell Forest Fire Simulator: Select Area by Zoom/Pan")
 
-# Load big TIF map
-tif_path = "maps/DE_10m_3035_tiled.tif"  
-
-
-    
-
-with rasterio.open(tif_path) as src:
+with rasterio.open(TIF_PATH) as src:
     # Initial map centered on Germany
     m = folium.Map(location=[51.1657, 10.4515], zoom_start=6)
 
