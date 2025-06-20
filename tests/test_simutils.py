@@ -1,4 +1,4 @@
-from flamecell import Grid, Ruleset, Simulation
+from sim_utils import *
 
 def test_grid_init():
     grid = Grid(width=10, height=10)

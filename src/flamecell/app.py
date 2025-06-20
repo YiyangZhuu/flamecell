@@ -9,7 +9,7 @@ from rasterio.warp import transform_bounds
 import numpy as np
 import time
 from sim_utils import *
-from flamecell import *
+
 
 # Path to data map
 TIF_PATH = "data\DE_10m_3035_tiled.tif"
