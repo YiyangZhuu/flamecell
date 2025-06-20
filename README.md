@@ -8,7 +8,8 @@
 It features wind and humidity effects, real world map-based inputs, and an interactive Streamlit interface.
 
 ## TODO
-- [ ] Fire risk assessment?
+- [ ] Better fire risk assessment?
+- [ ] Better model parameters?
 
 ## Features
 - Cellular automaton for wildfire spread

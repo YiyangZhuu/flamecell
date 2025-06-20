@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.0 (20/06/2025)
+
+- Added Tests
+- Automated CI/CD
+- Added final result representation as heatmap
+
 ## v0.2.0 (09/06/2025)
 
 - Added humidity-aware ignition probability

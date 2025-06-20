@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flamecell"
-version = "0.2.0"
+version = "0.3.0"
 description = "A python package to simulate the forest fire using cellular automaton"
 authors = ["YiyangZhu"]
 license = "MIT"
