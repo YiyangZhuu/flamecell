@@ -1,4 +1,4 @@
-from sim_utils import *
+from flamecell import sim_utils
 
 def test_grid_init():
     grid = Grid(width=10, height=10)
