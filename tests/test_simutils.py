@@ -1,6 +1,15 @@
 import pytest
 import numpy as np
 from flamecell.sim_utils import Grid, RuleSet, Simulation
+from flamecell.sim_utils import (
+    raster_to_cell,
+    raster_to_grid,
+    grid_to_img,
+    plot_grid,
+    plot_risk_map,
+    get_current_wind,
+    crop_and_resample
+)
 
 def test_grid_init():
     with pytest.raises(ValueError, match="Width must be a positive integer"):
@@ -50,3 +59,15 @@ def test_simulation_step_count_increments():
     sim.step()
 
     assert sim.step_count == 2
+
+@pytest.mark.parametrize("value, expected", [
+    (5, "WATER"),
+    (4, "WATER"),
+    (31, "TREE"),
+    (32, "GRASS"),
+    (22, "GRASS"),
+    (1, "EMPTY"),
+    ("0", TypeError)
+])
+def test_raster_to_cell(value, expected):
+    assert raster_to_cell(value) == expected

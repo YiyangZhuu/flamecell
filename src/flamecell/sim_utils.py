@@ -78,6 +78,8 @@ color_map = {
 }
 
 def raster_to_cell(pixel_value):
+    if not isinstance(pixel_value, int):
+        raise TypeError("Pixel Value should be non negative integer")
     if pixel_value == 5 or pixel_value == 4:
         return "WATER"
     elif pixel_value == 31:
