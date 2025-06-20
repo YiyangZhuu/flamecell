@@ -1,6 +1,6 @@
 # flamecell
 
-![version](https://img.shields.io/badge/version-0.2.0-blue.svg)
+![version](https://img.shields.io/badge/version-0.3.0-blue.svg)
 ![license](https://img.shields.io/badge/license-MIT-green.svg)
 ![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
 
