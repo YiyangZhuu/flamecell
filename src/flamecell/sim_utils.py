@@ -1,10 +1,9 @@
-import numpy as np
 import matplotlib.pyplot as plt
 import requests
 from rasterio.windows import from_bounds
 from rasterio.enums import Resampling
 from rasterio.warp import transform_bounds
-from rules import * 
+from .rules import * 
 
 class Grid:
     def __init__(self, width, height):
