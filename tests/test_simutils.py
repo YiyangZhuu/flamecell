@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+from unittest.mock import patch, MagicMock
 from flamecell.sim_utils import Grid, RuleSet, Simulation
 from flamecell.sim_utils import (
     raster_to_cell,
@@ -75,3 +76,79 @@ def test_raster_to_cell_type_error():
     with pytest.raises(TypeError):
         raster_to_cell("0")
 
+def test_raster_to_grid_shape_and_values():
+    data = np.array([[31, 32], [5, 0]])
+    grid = raster_to_grid(data)
+    assert grid.state.shape == (2, 2)
+    assert grid.state[0, 0] == "TREE"
+    assert grid.health[0, 0] == 10
+    assert grid.state[0, 1] == "GRASS"
+    assert grid.health[0, 1] == 4
+    assert grid.state[1, 0] == "WATER"
+    assert grid.health[1, 0] == 0
+    assert grid.state[1, 1] == "EMPTY"
+    assert grid.health[1, 1] == 0
+
+def test_grid_to_img_shape_and_type():
+    grid = Grid(3, 2)
+    grid.state[0, 0] = "TREE"
+    img = grid_to_img(grid)
+    assert img.shape == (2, 3, 3)
+    assert img.dtype == np.uint8
+
+def test_plot_grid_returns_figure():
+    grid = Grid(2, 2)
+    fig = plot_grid(grid)
+    assert fig is not None
+    assert hasattr(fig, "savefig")  # basic sanity check
+
+def test_plot_risk_map_returns_figure():
+    grid = Grid(2, 2)
+    sim = Simulation(grid, ruleset=MagicMock())
+    fig = plot_risk_map(sim)
+    assert fig is not None
+    assert hasattr(fig, "savefig")
+
+@patch("flamecell.sim_utils.requests.get")
+def test_get_current_wind_success(mock_get):
+    mock_response = MagicMock()
+    mock_response.raise_for_status.return_value = None
+    mock_response.json.return_value = {
+        "current": {
+            "wind_speed_10m": 3.5,
+            "wind_direction_10m": 90
+        }
+    }
+    mock_get.return_value = mock_response
+
+    speed, direction = get_current_wind(50, 6)
+    assert speed == 3.5
+    assert direction == 90
+
+@patch("flamecell.sim_utils.requests.get")
+def test_get_current_wind_failure(mock_get):
+    mock_get.side_effect = Exception("Network error")
+    msg, direction = get_current_wind(50, 6)
+    assert "Network error" in msg
+    assert direction is None
+
+@patch("flamecell.sim_utils.from_bounds")
+@patch("flamecell.sim_utils.transform_bounds")
+def test_crop_and_resample_mocks(transform_bounds_mock, from_bounds_mock):
+    mock_src = MagicMock()
+    mock_src.read.return_value = np.ones((1, 128, 128))
+    mock_src.crs = "EPSG:25832"
+    mock_src.transform = "dummy_transform"
+    mock_src.window_transform.return_value = "dummy_window_transform"
+
+    transform_bounds_mock.return_value = (1, 2, 3, 4)
+    from_bounds_mock.return_value = "window"
+
+    bounds = {
+        "_southWest": {"lat": 50.0, "lng": 6.0},
+        "_northEast": {"lat": 51.0, "lng": 7.0}
+    }
+
+    data, transform = crop_and_resample(mock_src, bounds)
+    assert data.shape == (1, 128, 128)
+    assert transform == "dummy_window_transform"
