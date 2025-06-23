@@ -4,7 +4,7 @@ import numbers
 from rasterio.windows import from_bounds
 from rasterio.enums import Resampling
 from rasterio.warp import transform_bounds
-from .rules import * 
+from rules import * 
 
 class Grid:
     def __init__(self, width, height):
@@ -39,7 +39,7 @@ class Simulation:
         self.max_steps = 1000
         self.ignite_time = np.zeros_like(grid.state, dtype=np.int32)
 
-    def step(self, prob=0.2, humidity=0.4, wind=np.array([0,0])):
+    def step(self, prob=0.2, humidity=0.4, wind=np.array([0,0]), **kwargs):
         # Seperate the loop for njit optimization
         new_state = self.grid.state.copy()
         new_health = self.grid.health.copy()
@@ -58,7 +58,7 @@ class Simulation:
                             neighbor_state = self.grid.state[ny, nx]
                             neighbors.append((neighbor_state, dx, dy))
                 # apply all the rules
-                state, health = self.ruleset.apply(x, y, self.grid.state, self.grid.health, neighbors, prob=prob, humidity=humidity, wind=wind)
+                state, health = self.ruleset.apply(x, y, self.grid.state, self.grid.health, neighbors, prob=prob, humidity=humidity, wind=wind, **kwargs)
                 new_state[y, x] = state
                 new_health[y, x] = health
         # Apply new state
@@ -159,6 +159,34 @@ def get_current_wind(lat, lon):
         wind_speed = data['current']['wind_speed_10m']
         wind_direction = data['current']['wind_direction_10m']
         return wind_speed, wind_direction
+    except Exception as e:
+        return str(e), None
+    
+def get_current_humidity(lat, lon):
+    url = (
+        f"https://api.open-meteo.com/v1/forecast?"
+        f"latitude={lat}&longitude={lon}&current=relative_humidity_2m"
+    )
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        humidity = data['current']['relative_humidity_2m']
+        return humidity
+    except Exception as e:
+        return str(e), None
+    
+def get_current_temperature(lat, lon):
+    url = (
+        f"https://api.open-meteo.com/v1/forecast?"
+        f"latitude={lat}&longitude={lon}&current=temperature_2m"
+    )
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        temp = data['current']['temperature_2m']
+        return temp
     except Exception as e:
         return str(e), None
 
