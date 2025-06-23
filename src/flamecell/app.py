@@ -3,12 +3,13 @@ from streamlit_folium import st_folium
 from streamlit_image_coordinates import streamlit_image_coordinates
 import folium
 import rasterio
-import time
-from sim_utils import *
+import os
+from flamecell.sim_utils import *
 
 
 # Path to data map
-TIF_PATH = "data\DE_10m_3035_tiled.tif"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # directory of current script
+TIF_PATH = os.path.join(BASE_DIR, 'data', 'DE_10m_3035_tiled.tif')
 
 
 # --- Streamlit app ---
