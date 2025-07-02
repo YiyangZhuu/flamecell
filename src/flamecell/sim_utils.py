@@ -15,7 +15,21 @@ from rasterio.warp import transform_bounds
 from flamecell.rules import *
 
 class Grid:
-    """Grid represents the simulation area with state and health matrices."""
+    """
+    Grid represents the simulation area with state and health matrices.
+
+    Parameters
+    ----------
+    width : int
+        Width of the grid.
+    height : int
+        Height of the grid.
+
+    Raises
+    ------
+    ValueError
+        If width or height is not a positive integer.
+    """
 
     def __init__(self, width, height):
         if not isinstance(width, int) or width <= 0:
@@ -28,15 +42,46 @@ class Grid:
         self.health = np.zeros((height, width), dtype=int)
 
 class RuleSet:
-    """RuleSet manages and applies update rules to each cell."""
+    """
+    RuleSet manages and applies update rules to each cell.
+    """
 
     def __init__(self):
         self.rules = []
 
     def add_rule(self, rule):
+        """
+        Add a transition rule.
+
+        Parameters
+        ----------
+        rule : callable
+            A rule function to apply to cells.
+        """
         self.rules.append(rule)
 
     def apply(self, x, y, state_matrix, health_matrix, neighbors, **kwargs):
+        """
+        Apply all rules to a specific cell.
+
+        Parameters
+        ----------
+        x, y : int
+            Coordinates of the cell.
+        state_matrix : np.ndarray
+            Current state matrix.
+        health_matrix : np.ndarray
+            Current health matrix.
+        neighbors : list of tuple
+            Neighbor states and relative positions.
+        kwargs : dict
+            Additional parameters like wind, humidity, etc.
+
+        Returns
+        -------
+        tuple
+            New state and health of the cell.
+        """
         new_state = state_matrix[y, x]
         new_health = health_matrix[y, x]
         for rule in self.rules:
@@ -44,7 +89,16 @@ class RuleSet:
         return new_state, new_health
 
 class Simulation:
-    """Manages simulation steps and grid evolution."""
+    """
+    Manages simulation steps and grid evolution.
+
+    Parameters
+    ----------
+    grid : Grid
+        The simulation grid.
+    ruleset : RuleSet
+        The ruleset to apply during updates.
+    """
 
     def __init__(self, grid, ruleset):
         self.grid = grid
@@ -54,7 +108,20 @@ class Simulation:
         self.ignite_time = np.zeros_like(grid.state, dtype=np.int32)
 
     def step(self, prob=0.2, humidity=0.4, wind=np.array([0,0]), **kwargs):
-        """Advances the simulation by one step."""
+        """
+        Advances the simulation by one step.
+
+        Parameters
+        ----------
+        prob : float
+            Base ignition probability.
+        humidity : float
+            Environmental humidity.
+        wind : np.ndarray
+            Wind vector (dx, dy).
+        kwargs : dict
+            Additional arguments passed to rule functions.
+        """
         new_state = self.grid.state.copy()
         new_health = self.grid.health.copy()
         for y in range(self.grid.height):
@@ -82,7 +149,7 @@ class Simulation:
 
 
 
-# color map for visualization relative RGB values from [0.0, 1.0]
+# color map for visualization, relative RGB values from [0.0, 1.0]
 color_map = {
     "FIRE": (1.0, 0.5, 0),
     "TREE": (0.1, 0.45, 0.1),
@@ -93,7 +160,24 @@ color_map = {
 }
 
 def raster_to_cell(pixel_value):
-    """Convert raster pixel value to cell type."""
+    """
+    Convert raster pixel value to cell type.
+
+    Parameters
+    ----------
+    pixel_value : int
+        Raster pixel classification code.
+
+    Returns
+    -------
+    str
+        Corresponding cell type.
+
+    Raises
+    ------
+    TypeError
+        If input is not an integer.
+    """
     if not isinstance(pixel_value, numbers.Integral):
         raise TypeError("Pixel Value should be non-negative integer")
     
@@ -106,7 +190,19 @@ def raster_to_cell(pixel_value):
     return "EMPTY"
 
 def raster_to_grid(data):
-    """Convert raster data into a Grid object."""
+    """
+    Convert raster data into a Grid object.
+
+    Parameters
+    ----------
+    data : np.ndarray
+        Raster classification matrix.
+
+    Returns
+    -------
+    Grid
+        Initialized simulation grid.
+    """
     height, width = data.shape
     grid = Grid(width, height)
     for y in range(height):
@@ -120,7 +216,19 @@ def raster_to_grid(data):
     return grid
 
 def grid_to_img(grid):
-    """Convert grid state to RGB image array."""
+    """
+    Convert grid state to RGB image array.
+
+    Parameters
+    ----------
+    grid : Grid
+        Simulation grid.
+
+    Returns
+    -------
+    np.ndarray
+        RGB image array.
+    """
     img = np.zeros((grid.height, grid.width, 3), dtype=np.uint8)
     for y in range(grid.height):
         for x in range(grid.width):
@@ -129,6 +237,19 @@ def grid_to_img(grid):
     return img
 
 def plot_grid(grid):
+    """
+    Display the grid state as an image.
+
+    Parameters
+    ----------
+    grid : Grid
+        Simulation grid.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        Figure object for visualization.
+    """
     img = np.zeros((grid.height, grid.width, 3))
     for y in range(grid.height):
         for x in range(grid.width):
@@ -141,6 +262,19 @@ def plot_grid(grid):
     return fig
 
 def plot_risk_map(sim):
+    """
+    Overlay risk heatmap based on ignition time over the current grid state.
+
+    Parameters
+    ----------
+    sim : Simulation
+        Simulation object.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        Figure object with overlayed heatmap.
+    """
     base = np.zeros((sim.grid.height, sim.grid.width, 3))
     for y in range(sim.grid.height):
         for x in range(sim.grid.width):
@@ -160,9 +294,16 @@ def plot_risk_map(sim):
 def get_current_wind(lat, lon):
     """
     Get current wind speed and direction using Open-Meteo API.
-    Returns:
-        wind_speed (float): in m/s
-        wind_direction (float): in degrees (0° is North, 90° is East)
+
+    Parameters
+    ----------
+    lat, lon : float
+        Latitude. Longitude.
+
+    Returns
+    -------
+    tuple
+        (wind speed in m/s, wind direction in degrees)
     """
     url = (
         f"https://api.open-meteo.com/v1/forecast?"
@@ -179,6 +320,19 @@ def get_current_wind(lat, lon):
         return str(e), None
     
 def get_current_humidity(lat, lon):
+    """
+    Get current relative humidity using Open-Meteo API.
+
+    Parameters
+    ----------
+    lat, lon : float
+        Latitude. Longitude.
+
+    Returns
+    -------
+    float or str
+        Relative humidity (%) or error message.
+    """
     url = (
         f"https://api.open-meteo.com/v1/forecast?"
         f"latitude={lat}&longitude={lon}&current=relative_humidity_2m"
@@ -193,6 +347,19 @@ def get_current_humidity(lat, lon):
         return str(e), None
     
 def get_current_temperature(lat, lon):
+    """
+    Get current temperature using Open-Meteo API.
+
+    Parameters
+    ----------
+    lat, lon : float
+        Latitude. Longitude.
+
+    Returns
+    -------
+    float or str
+        Temperature (°C) or error message.
+    """
     url = (
         f"https://api.open-meteo.com/v1/forecast?"
         f"latitude={lat}&longitude={lon}&current=temperature_2m"
@@ -207,7 +374,23 @@ def get_current_temperature(lat, lon):
         return str(e), None
 
 def crop_and_resample(src, bounds, output_size=(128, 128)):
-    """Crop raster to bounds and resample to output_size (width, height)."""
+    """
+    Crop raster to bounds and resample to specified size.
+
+    Parameters
+    ----------
+    src : rasterio.DatasetReader
+        Open land use map.
+    bounds : dict
+        Leaflet-style bounds with '_southWest' and '_northEast'.
+    output_size : tuple
+        Desired output shape (width, height).
+
+    Returns
+    -------
+    tuple
+        (resampled data, transform)
+    """
     south = bounds['_southWest']['lat']
     west = bounds['_southWest']['lng']
     north = bounds['_northEast']['lat']
@@ -235,6 +418,19 @@ def crop_and_resample(src, bounds, output_size=(128, 128)):
     return data, transform
 
 def normalize(arr):
+    """
+    Normalize array to 0–255 (uint8).
+
+    Parameters
+    ----------
+    arr : np.ndarray
+        Input numeric array.
+
+    Returns
+    -------
+    np.ndarray
+        Normalized uint8 array.
+    """
     arr = arr.astype('float32')
     arr -= arr.min()
     arr /= arr.max()

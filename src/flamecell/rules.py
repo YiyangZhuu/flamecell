@@ -1,8 +1,42 @@
+"""
+Forest Fire Simulation Framework
+
+This module provides rule functions for the grid update.
+"""
+
 import numpy as np
 
 # Rules
 # ignite under certain probability, humidity and wind
-def ignite(x, y, state, health, neighbors, prob=0.15, humidity=40, wind=np.array([0,0]), temp=20, **kwargs):
+def ignite(x, y, state, health, neighbors, 
+           prob=0.15, humidity=40, wind=np.array([0,0]), temp=20, **kwargs):
+    """
+    Determine if a cell should ignite based on neighbors, humidity, wind, and temperature.
+
+    Parameters
+    ----------
+    x, y: int
+        X, Y-coordinate of the cell.
+    state : str
+        Current state of the cell.
+    health : int
+        Health value of the cell.
+    neighbors : list of tuples
+        List of (neighbor_state, dx, dy) for neighboring cells.
+    prob : float, optional
+        Base ignition probability (default is 0.15).
+    humidity : float, optional
+        Humidity percentage (default is 40).
+    wind : np.ndarray, optional
+        Wind vector (default is [0, 0]).
+    temp : float, optional
+        Temperature in degrees Celsius (default is 20).
+
+    Returns
+    -------
+    tuple
+        New state and health of the cell.
+    """
     if state in ["TREE", "GRASS"]:
         ignition_prob = 0.0
         for neighbor_state, dx, dy in neighbors:
@@ -16,7 +50,39 @@ def ignite(x, y, state, health, neighbors, prob=0.15, humidity=40, wind=np.array
 # p_burn = p0 * Ks * Kw * Ktheta
 # take Ks = 1 (Pine)
 # this model produce weird result in my case
-def ignite1(x, y, state, health, neighbors, prob=0.15, humidity=40, wind=np.array([0,0]), temp=20, wspd=0, **kwargs):
+def ignite1(x, y, state, health, neighbors, 
+            prob=0.15, humidity=40, wind=np.array([0,0]), temp=20, wspd=0, **kwargs):
+    """
+    Alternative ignition rule based on multifactor fire model.
+    Based on the model: p_burn = p0 * Ks * Kw * Ktheta
+    not working well now.
+
+    Parameters
+    ----------
+    x, y: int
+        X, Y-coordinate of the cell.
+    state : str
+        Current state of the cell.
+    health : int
+        Health value of the cell.
+    neighbors : list of tuples
+        List of (neighbor_state, dx, dy) for neighboring cells.
+    prob : float, optional
+        Unused base probability (default is 0.15).
+    humidity : float, optional
+        Humidity percentage (default is 40).
+    wind : np.ndarray, optional
+        Wind vector (default is [0, 0]).
+    temp : float, optional
+        Temperature in degrees Celsius (default is 20).
+    wspd : float, optional
+        Wind speed in m/s (default is 0).
+
+    Returns
+    -------
+    tuple
+        New state and health of the cell.
+    """
     if state in ["TREE", "GRASS"]:
         p_burn = 0
         p_wind_corr = 0
@@ -31,6 +97,27 @@ def ignite1(x, y, state, health, neighbors, prob=0.15, humidity=40, wind=np.arra
     return state, health
 
 def burning(x, y, state, health, neighbors, **kwargs):
+    """
+    Update cell state if it is burning.
+
+    Parameters
+    ----------
+    x, y : int
+        X, Y-coordinate of the cell.
+    state : str
+        Current state of the cell.
+    health : int
+        Health value of the cell.
+    neighbors : list of tuples
+        Not used.
+    **kwargs : dict
+        Additional arguments (ignored).
+
+    Returns
+    -------
+    tuple
+        New state and health of the cell.
+    """
     if state == "FIRE":
         health -= np.random.randint(1,3)
         if health <= 0:
