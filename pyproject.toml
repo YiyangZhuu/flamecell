@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "flamecell"
-version = "0.3.0"
+version = "0.4.0"
 description = "A python package to simulate the forest fire using cellular automaton"
 authors = ["YiyangZhu"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.9"
 numpy = "^1.26"
 matplotlib = "^3.8"
 requests = "^2.32"

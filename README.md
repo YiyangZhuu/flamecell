@@ -1,6 +1,6 @@
 # flamecell
 
-![version](https://img.shields.io/badge/version-0.3.0-blue.svg)
+![version](https://img.shields.io/badge/version-0.4.0-blue.svg)
 ![license](https://img.shields.io/badge/license-MIT-green.svg)
 ![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
 
@@ -9,7 +9,6 @@ It features wind and humidity effects, real world map-based inputs, and an inter
 
 ## TODO
 - [ ] Better fire risk assessment?
-- [ ] Better model parameters?
 
 ## Features
 - Cellular automaton for wildfire spread

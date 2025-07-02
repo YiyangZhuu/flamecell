@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.0 (02/07/2025)
+
+- Added docstrings for readability
+- rewrite some functions for better readability
+- Added another ignition model (still testing)
+
 ## v0.3.0 (20/06/2025)
 
 - Added Tests
