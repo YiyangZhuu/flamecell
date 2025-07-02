@@ -1,12 +1,22 @@
-import matplotlib.pyplot as plt
-import requests
+"""
+Forest Fire Simulation Framework
+
+This module provides classes and functions for simulating and visualizing a forest 
+fireusing cellular automata. It supports raster input, dynamic rule-based evolution,
+and external weather data integration.
+"""
+
 import numbers
-from rasterio.windows import from_bounds
+import requests
+import matplotlib.pyplot as plt
 from rasterio.enums import Resampling
+from rasterio.windows import from_bounds
 from rasterio.warp import transform_bounds
 from flamecell.rules import *
 
 class Grid:
+    """Grid represents the simulation area with state and health matrices."""
+
     def __init__(self, width, height):
         if not isinstance(width, int) or width <= 0:
             raise ValueError("Width must be a positive integer")
@@ -18,6 +28,8 @@ class Grid:
         self.health = np.zeros((height, width), dtype=int)
 
 class RuleSet:
+    """RuleSet manages and applies update rules to each cell."""
+
     def __init__(self):
         self.rules = []
 
@@ -32,6 +44,8 @@ class RuleSet:
         return new_state, new_health
 
 class Simulation:
+    """Manages simulation steps and grid evolution."""
+
     def __init__(self, grid, ruleset):
         self.grid = grid
         self.ruleset = ruleset
@@ -40,7 +54,7 @@ class Simulation:
         self.ignite_time = np.zeros_like(grid.state, dtype=np.int32)
 
     def step(self, prob=0.2, humidity=0.4, wind=np.array([0,0]), **kwargs):
-        # Seperate the loop for njit optimization
+        """Advances the simulation by one step."""
         new_state = self.grid.state.copy()
         new_health = self.grid.health.copy()
         for y in range(self.grid.height):
@@ -68,7 +82,7 @@ class Simulation:
 
 
 
-# color map for visualization [0.0, 1.0]
+# color map for visualization relative RGB values from [0.0, 1.0]
 color_map = {
     "FIRE": (1.0, 0.5, 0),
     "TREE": (0.1, 0.45, 0.1),
@@ -79,18 +93,20 @@ color_map = {
 }
 
 def raster_to_cell(pixel_value):
+    """Convert raster pixel value to cell type."""
     if not isinstance(pixel_value, numbers.Integral):
-        raise TypeError("Pixel Value should be non negative integer")
-    if pixel_value == 5 or pixel_value == 4:
+        raise TypeError("Pixel Value should be non-negative integer")
+    
+    if pixel_value in (4, 5):
         return "WATER"
-    elif pixel_value == 31:
+    if pixel_value == 31:
         return "TREE"
-    elif pixel_value == 32 or pixel_value == 22:
+    if pixel_value in (22, 32):
         return "GRASS"
-    else:
-        return "EMPTY"
+    return "EMPTY"
 
 def raster_to_grid(data):
+    """Convert raster data into a Grid object."""
     height, width = data.shape
     grid = Grid(width, height)
     for y in range(height):
@@ -104,13 +120,13 @@ def raster_to_grid(data):
     return grid
 
 def grid_to_img(grid):
+    """Convert grid state to RGB image array."""
     img = np.zeros((grid.height, grid.width, 3), dtype=np.uint8)
     for y in range(grid.height):
         for x in range(grid.width):
-            img[y, x, 0] = color_map[grid.state[y][x]][0] * 255
-            img[y, x, 1] = color_map[grid.state[y][x]][1] * 255
-            img[y, x, 2] = color_map[grid.state[y][x]][2] * 255
-    return img 
+            r, g, b = color_map[grid.state[y][x]]
+            img[y, x] = [int(r * 255), int(g * 255), int(b * 255)]
+    return img
 
 def plot_grid(grid):
     img = np.zeros((grid.height, grid.width, 3))
