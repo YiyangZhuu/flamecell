@@ -20,7 +20,9 @@ import folium
 import rasterio
 import os
 import numpy as np
-from sim_utils import *
+import sys
+sys.path.append("../src")
+from flamecell.sim_utils import *
 
 
 def main():

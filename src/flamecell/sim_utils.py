@@ -12,7 +12,9 @@ import matplotlib.pyplot as plt
 from rasterio.enums import Resampling
 from rasterio.windows import from_bounds
 from rasterio.warp import transform_bounds
-from rules import *
+import sys
+sys.path.append("../src")
+from flamecell.rules import *
 
 class Grid:
     """
