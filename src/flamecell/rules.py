@@ -42,7 +42,7 @@ def ignite(x, y, state, health, neighbors,
         for neighbor_state, dx, dy in neighbors:
             if neighbor_state == "FIRE":
                 ignition_prob += 1 + (dx * wind[0] + dy * wind[1]) * 0.02     
-        if np.random.rand() < ignition_prob * prob * (1 - 0.01 * humidity) * (1 + 0.02 * (temp - 20)):
+        if np.random.rand() < ignition_prob * prob * (1 - 0.0085 * humidity) * (1 + 0.02 * (temp - 20)):
             return "FIRE", health  # Start burning
     return state, health
 

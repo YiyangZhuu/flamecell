@@ -1,6 +1,8 @@
 import pytest
 import numpy as np
 from unittest.mock import patch, MagicMock
+import sys
+sys.path.append("../src")
 from flamecell.sim_utils import Grid, RuleSet, Simulation
 from flamecell.sim_utils import (
     raster_to_cell,

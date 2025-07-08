@@ -1,5 +1,7 @@
 import numpy as np
 import pytest
+import sys
+sys.path.append("../src")
 from flamecell.rules import ignite, burning
 
 @pytest.mark.parametrize("state, neighbors, expected", [
