@@ -20,7 +20,7 @@ import folium
 import rasterio
 import os
 import numpy as np
-from flamecell.sim_utils import *
+from sim_utils import *
 
 
 def main():
