@@ -13,7 +13,7 @@ from rasterio.enums import Resampling
 from rasterio.windows import from_bounds
 from rasterio.warp import transform_bounds
 import sys
-sys.path.append("../src")
+sys.path.append("../flamecell/src")
 from flamecell.rules import *
 
 class Grid:

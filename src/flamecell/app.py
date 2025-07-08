@@ -21,7 +21,7 @@ import rasterio
 import os
 import numpy as np
 import sys
-sys.path.append("../src")
+sys.path.append("../flamecell/src")
 from flamecell.sim_utils import *
 
 
