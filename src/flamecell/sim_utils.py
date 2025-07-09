@@ -293,7 +293,7 @@ def plot_risk_map(sim):
     return fig
 
 
-def get_current_wind(lat, lon, time=None):
+def get_current_wind(lat, lon):
     """
     Get current wind speed and direction using Open-Meteo API.
 
@@ -323,7 +323,7 @@ def get_current_wind(lat, lon, time=None):
         
 
     
-def get_current_humidity(lat, lon, time=None):
+def get_current_humidity(lat, lon):
     """
     Get current relative humidity using Open-Meteo API.
 
@@ -351,7 +351,7 @@ def get_current_humidity(lat, lon, time=None):
     except Exception as e:
         return str(e), None
     
-def get_current_temperature(lat, lon, time=None):
+def get_current_temperature(lat, lon):
     """
     Get current temperature using Open-Meteo API.
 

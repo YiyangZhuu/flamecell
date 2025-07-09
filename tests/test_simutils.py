@@ -161,6 +161,29 @@ def test_get_current_humidity_failure(mock_get):
     assert "Network error" in msg
     assert humidity is None
 
+@patch("flamecell.sim_utils.requests.get")
+def test_get_current_temperature_success(mock_get):
+    mock_response = MagicMock()
+    mock_response.raise_for_status.return_value = None
+    mock_response.json.return_value = {
+        "current": {
+            "temperature_2m": 20,
+            "time": "now"
+        }
+    }
+    mock_get.return_value = mock_response
+
+    temperature, time = get_current_temperature(50, 6)
+    assert temperature == 20
+    assert time == "now"
+
+@patch("flamecell.sim_utils.requests.get")
+def test_get_current_temperature_failure(mock_get):
+    mock_get.side_effect = Exception("Network error")
+    msg, temperature = get_current_temperature(50, 6)
+    assert "Network error" in msg
+    assert temperature is None
+
 
 @patch("flamecell.sim_utils.from_bounds")
 @patch("flamecell.sim_utils.transform_bounds")
