@@ -317,6 +317,7 @@ def get_current_wind(lat, lon):
         data = response.json()
         wind_speed = data['current']['wind_speed_10m']
         wind_direction = data['current']['wind_direction_10m']
+        time = data['current']['time']
         return wind_speed, wind_direction, time
     except Exception as e:
         return str(e), None
