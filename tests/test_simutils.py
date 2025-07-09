@@ -11,6 +11,8 @@ from flamecell.sim_utils import (
     plot_grid,
     plot_risk_map,
     get_current_wind,
+    get_current_humidity,
+    get_current_temperature,
     crop_and_resample
 )
 
@@ -118,14 +120,16 @@ def test_get_current_wind_success(mock_get):
     mock_response.json.return_value = {
         "current": {
             "wind_speed_10m": 3.5,
-            "wind_direction_10m": 90
+            "wind_direction_10m": 90,
+            "time": "now"
         }
     }
     mock_get.return_value = mock_response
 
-    speed, direction = get_current_wind(50, 6)
+    speed, direction, time = get_current_wind(50, 6)
     assert speed == 3.5
     assert direction == 90
+    assert time == "now"
 
 @patch("flamecell.sim_utils.requests.get")
 def test_get_current_wind_failure(mock_get):
@@ -133,6 +137,30 @@ def test_get_current_wind_failure(mock_get):
     msg, direction = get_current_wind(50, 6)
     assert "Network error" in msg
     assert direction is None
+
+@patch("flamecell.sim_utils.requests.get")
+def test_get_current_humidity_success(mock_get):
+    mock_response = MagicMock()
+    mock_response.raise_for_status.return_value = None
+    mock_response.json.return_value = {
+        "current": {
+            "relative_humidity_2m": 40,
+            "time": "now"
+        }
+    }
+    mock_get.return_value = mock_response
+
+    humidity, time = get_current_humidity(50, 6)
+    assert humidity == 40
+    assert time == "now"
+
+@patch("flamecell.sim_utils.requests.get")
+def test_get_current_humidity_failure(mock_get):
+    mock_get.side_effect = Exception("Network error")
+    msg, humidity = get_current_humidity(50, 6)
+    assert "Network error" in msg
+    assert humidity is None
+
 
 @patch("flamecell.sim_utils.from_bounds")
 @patch("flamecell.sim_utils.transform_bounds")
