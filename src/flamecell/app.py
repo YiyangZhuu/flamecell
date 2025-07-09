@@ -27,6 +27,8 @@ from flamecell.sim_utils import *
 
 def main():
     st.title("FlameCell Forest Fire Simulator: Select Area by Zoom/Pan")
+    # link to download more map
+    st.markdown("[Learn more about the data source](https://heidata.uni-heidelberg.de/dataset.xhtml?persistentId=doi:10.11588/data/IUTCDN)")
 
     # Load raster
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -57,12 +59,13 @@ def main():
         # Wind
         wind_source = st.sidebar.selectbox("Wind", ["Current", "Custom"])
         if wind_source == "Current":
-            wspd, wdir = get_current_wind((south + north) / 2, (west + east) / 2)
+            wspd, wdir, time = get_current_wind((south + north) / 2, (west + east) / 2)
             st.sidebar.write(f"Current wind speed: {wspd} km/h")
             st.sidebar.write(f"Direction: {wdir}°")
+            st.sidebar.write(f"Data & Time: {time}")
         else:
-            wdir = st.sidebar.number_input("Custom wind direction", min_value=0, max_value=360, value=0)
-            wspd = st.sidebar.number_input("Custom wind speed", min_value=0, value=0)
+            wdir = st.sidebar.number_input("Custom wind direction [degree]", min_value=0, max_value=360, value=0)
+            wspd = st.sidebar.number_input("Custom wind speed [km/h]", min_value=0, value=0)
 
         wind = np.array([
             wspd * np.cos(np.radians(wdir)),
@@ -72,16 +75,18 @@ def main():
         # Humidity
         humidity_source = st.sidebar.selectbox("Humidity", ["Current", "Custom"])
         if humidity_source == "Current":
-            rel_humi = get_current_humidity((south + north) / 2, (west + east) / 2)
+            rel_humi, time = get_current_humidity((south + north) / 2, (west + east) / 2)
             st.sidebar.write(f"Humidity: {rel_humi}%")
+            st.sidebar.write(f"Data & Time: {time}")
         else:
             rel_humi = st.sidebar.number_input("Custom humidity %", min_value=0, max_value=100, value=40)
 
         # Temperature
         temperature_source = st.sidebar.selectbox("Temperature", ["Current", "Custom"])
         if temperature_source == "Current":
-            temp = get_current_temperature((south + north) / 2, (west + east) / 2)
+            temp, time = get_current_temperature((south + north) / 2, (west + east) / 2)
             st.sidebar.write(f"Temperature: {temp}°C")
+            st.sidebar.write(f"Data & Time: {time}")
         else:
             temp = st.sidebar.number_input("Custom temperature", min_value=0, max_value=100, value=20)
 
@@ -113,7 +118,8 @@ def main():
                     st.rerun()
 
         # Run simulation
-        prob = st.sidebar.slider("Ignition Probability per Neighbor", 0.0, 1.0, 0.2, 0.01)
+        prob = 0.2
+        # prob = st.sidebar.slider("Ignition Probability per Neighbor", 0.0, 1.0, 0.2, 0.01)
 
         if st.sidebar.button("Run Simulation"):
             ruleset = RuleSet()

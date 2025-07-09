@@ -293,7 +293,7 @@ def plot_risk_map(sim):
     return fig
 
 
-def get_current_wind(lat, lon):
+def get_current_wind(lat, lon, time=None):
     """
     Get current wind speed and direction using Open-Meteo API.
 
@@ -317,11 +317,13 @@ def get_current_wind(lat, lon):
         data = response.json()
         wind_speed = data['current']['wind_speed_10m']
         wind_direction = data['current']['wind_direction_10m']
-        return wind_speed, wind_direction
+        return wind_speed, wind_direction, time
     except Exception as e:
         return str(e), None
+        
+
     
-def get_current_humidity(lat, lon):
+def get_current_humidity(lat, lon, time=None):
     """
     Get current relative humidity using Open-Meteo API.
 
@@ -344,11 +346,12 @@ def get_current_humidity(lat, lon):
         response.raise_for_status()
         data = response.json()
         humidity = data['current']['relative_humidity_2m']
-        return humidity
+        time = data['current']['time']
+        return humidity, time
     except Exception as e:
         return str(e), None
     
-def get_current_temperature(lat, lon):
+def get_current_temperature(lat, lon, time=None):
     """
     Get current temperature using Open-Meteo API.
 
@@ -371,7 +374,8 @@ def get_current_temperature(lat, lon):
         response.raise_for_status()
         data = response.json()
         temp = data['current']['temperature_2m']
-        return temp
+        time = data['current']['time']
+        return temp, time
     except Exception as e:
         return str(e), None
 
