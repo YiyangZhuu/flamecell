@@ -1,6 +1,6 @@
 # flamecell
 
-![FLAMECELL Logo](docs/flamecell_logo.png)
+<img src="docs/flamecell_logo.png" alt="FLAMECELL Logo" width="200"/>
 ![version](https://img.shields.io/badge/version-0.4.0-blue.svg)
 ![license](https://img.shields.io/badge/license-MIT-green.svg)
 ![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
