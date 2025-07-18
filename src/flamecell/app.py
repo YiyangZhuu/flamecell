@@ -88,7 +88,7 @@ def main():
             st.sidebar.write(f"Temperature: {temp}°C")
             st.sidebar.write(f"Data & Time: {time}")
         else:
-            temp = st.sidebar.number_input("Custom temperature", min_value=0, max_value=100, value=20)
+            temp = st.sidebar.number_input("Custom temperature °C", min_value=-30, max_value=60, value=20)
 
         # Session state setup
         for key in ["grid", "img", "data", "sim"]:

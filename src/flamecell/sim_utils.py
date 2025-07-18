@@ -16,6 +16,17 @@ import sys
 sys.path.append("../flamecell/src")
 from flamecell.rules import *
 
+
+# color map for visualization, relative RGB values from [0.0, 1.0]
+color_map = {
+    "FIRE": (1.0, 0.5, 0),
+    "TREE": (0.1, 0.45, 0.1),
+    "GRASS": (0.6, 1.0, 0.6),
+    "WATER": (0.0, 0.0, 1.0),
+    "ASH": (0.0, 0.0, 0.0),
+    "EMPTY": (0.75, 0.75, 0.75)
+}
+
 class Grid:
     """
     Grid represents the simulation area with state and health matrices.
@@ -149,17 +160,6 @@ class Simulation:
         self.grid.health = new_health
         self.step_count += 1
 
-
-
-# color map for visualization, relative RGB values from [0.0, 1.0]
-color_map = {
-    "FIRE": (1.0, 0.5, 0),
-    "TREE": (0.1, 0.45, 0.1),
-    "GRASS": (0.6, 1.0, 0.6),
-    "WATER": (0.0, 0.0, 1.0),
-    "ASH": (0.0, 0.0, 0.0),
-    "EMPTY": (1.0, 1.0, 1.0),
-}
 
 def raster_to_cell(pixel_value):
     """
